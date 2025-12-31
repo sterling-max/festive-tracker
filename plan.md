@@ -13,10 +13,10 @@
 - [x] Add a visual toggle (switcher) to change modes.
 
 ## Phase 3: Visual Enhancements for New Year
-- [ ] Implement `Fireworks` effect for New Year mode (replaces `Snow` or `FallingGifts`?).
-- [ ] Update `SantaFlightBar` or create a New Year equivalent (e.g., "Countdown Progress").
-- [ ] Theming updates (Glitzy gold, dark colors).
+- [x] Implement `Fireworks` effect for New Year mode (replaces `Snow` or `FallingGifts`?).
+- [x] Update `SantaFlightBar` or create a New Year equivalent (e.g., "Countdown Progress").
+- [x] Theming updates (Glitzy gold, dark colors).
 
 ## Final Polish
-- [ ] Verify responsiveness.
-- [ ] Final commit.
+- [x] Verify responsiveness.
+- [x] Final commit.

@@ -16,8 +16,8 @@ Convert the current Santa Tracker into a versatile Holiday Countdown app that su
 - [x] Create GitHub repository using GH CLI.
 - [x] Commit and push initial code.
 - [x] Implement "New Year's Eve" countdown logic.
-- [ ] Create "New Year" visual assets/effects (e.g., Fireworks instead of Gifts?).
+- [x] Create "New Year" visual assets/effects (e.g., Fireworks instead of Gifts?).
 - [x] Add the mode toggle UI.
 
 ## Progress Tracking
-- 2025-12-31: Project renamed, Git setup, New Year mode implemented with toggle.
+- 2025-12-31: Project renamed, Git setup, New Year mode implemented with toggle and fireworks.

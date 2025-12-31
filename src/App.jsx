@@ -342,11 +342,23 @@ const SparkleBurst = () => {
 };
 
 function App() {
-    const [mode, setMode] = useState('christmas'); // 'christmas' or 'new-year'
+    // Auto-detect mode based on date: After Dec 25, default to New Year
+    const getInitialMode = () => {
+        const now = new Date();
+        const month = now.getMonth();
+        const day = now.getDate();
+        if ((month === 11 && day > 25) || month === 0) return 'new-year';
+        return 'christmas';
+    };
+
+    const [mode, setMode] = useState(getInitialMode());
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     const [isTargetReached, setIsTargetReached] = useState(false);
 
     useEffect(() => {
+        // Reset state when mode changes
+        setIsTargetReached(false);
+
         const calculateTarget = () => {
             const target = new Date();
             if (mode === 'christmas') {
@@ -515,7 +527,7 @@ function App() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1.2, duration: 1 }}
-                    className="absolute bottom-12 md:bottom-16 flex items-center gap-4 text-white/50 font-body text-xs md:text-sm tracking-[0.3em] uppercase"
+                    className="absolute bottom-24 md:bottom-28 flex items-center gap-4 text-white/50 font-body text-xs md:text-sm tracking-[0.3em] uppercase"
                 >
                     <Sparkles className="w-4 h-4 text-gold" />
                     <span>
