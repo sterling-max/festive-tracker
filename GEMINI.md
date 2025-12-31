@@ -1,0 +1,23 @@
+# Project Memory: Festive Tracker
+
+## Objective
+Convert the current Santa Tracker into a versatile Holiday Countdown app that supports a "New Year Mode" with a toggle.
+
+## Decisions & Conventions
+- **App Name**: `festive-tracker` (updated from `carassai-christmas`).
+- **Modes**: 
+  - `christmas`: Countdown to Christmas (already implemented).
+  - `new-year`: Countdown to New Year's Eve midnight.
+- **Toggle**: A stylish switcher to flip between modes.
+
+## Pending Tasks
+- [ ] Rename the app in `package.json`.
+- [ ] Initialize git repository.
+- [ ] Create GitHub repository using GH CLI.
+- [ ] Commit and push initial code.
+- [ ] Implement "New Year's Eve" countdown logic.
+- [ ] Create "New Year" visual assets/effects (e.g., Fireworks instead of Gifts?).
+- [ ] Add the mode toggle UI.
+
+## Progress Tracking
+- 2025-12-31: Project initiated. Renaming and Git setup starting.
