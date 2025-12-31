@@ -341,6 +341,7 @@ const SparkleBurst = () => {
     );
 };
 
+
 function App() {
     // Auto-detect mode based on date: After Dec 25, default to New Year
     const getInitialMode = () => {
@@ -471,7 +472,7 @@ function App() {
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 1.5, filter: "blur(20px)" }}
                             transition={{ delay: 0.3, duration: 0.8 }}
-                            className="relative flex items-start justify-center gap-2 md:gap-8 w-full transform scale-110 md:scale-125"
+                            className="relative flex items-start justify-center gap-4 md:gap-12 w-full max-w-full mx-auto"
                         >
                             {/* Pulse & Sparkle Wrapper */}
                             <motion.div
@@ -483,42 +484,31 @@ function App() {
                                 <SparkleBurst />
                             </motion.div>
 
-                            {timeLeft.days > 0 && (
-                                <div className="flex flex-col items-center z-10 min-w-[1.2em]">
-                                    <span className="text-8xl md:text-[18rem] leading-none font-heading text-white drop-shadow-[0_0_30px_rgba(207,181,59,0.4)] font-bold tabular-nums">
-                                        {timeLeft.days}
-                                    </span>
-                                    <span className="text-gold/90 text-sm md:text-2xl font-body uppercase tracking-[0.4em] mt-2 md:mt-4">Giorni</span>
-                                </div>
-                            )}
-
-                            {/* Colon Separator */}
-                            {timeLeft.days > 0 && <span className="text-7xl md:text-[14rem] text-gold/40 font-heading animate-pulse -mt-4 md:-mt-8 z-10">:</span>}
-
-                            <div className="flex flex-col items-center z-10 min-w-[1.2em]">
-                                <span className="text-8xl md:text-[18rem] leading-none font-heading text-white drop-shadow-[0_0_30px_rgba(207,181,59,0.4)] font-bold tabular-nums">
-                                    {String(timeLeft.hours).padStart(2, '0')}
-                                </span>
-                                <span className="text-gold/90 text-sm md:text-2xl font-body uppercase tracking-[0.4em] mt-2 md:mt-4">Ore</span>
-                            </div>
-
-                            <span className="text-7xl md:text-[14rem] text-gold/40 font-heading animate-pulse -mt-4 md:-mt-8 z-10">:</span>
-
-                            <div className="flex flex-col items-center z-10 min-w-[1.3em]">
-                                <span className="text-8xl md:text-[18rem] leading-none font-heading text-white drop-shadow-[0_0_30px_rgba(207,181,59,0.4)] font-bold tabular-nums">
-                                    {String(timeLeft.minutes).padStart(2, '0')}
-                                </span>
-                                <span className="text-gold/90 text-sm md:text-2xl font-body uppercase tracking-[0.4em] mt-2 md:mt-4">Minuti</span>
-                            </div>
-
-                            <span className="text-7xl md:text-[14rem] text-gold/40 font-heading animate-pulse -mt-4 md:-mt-8 z-10">:</span>
-
-                            <div className="flex flex-col items-center relative z-10 min-w-[1.3em]">
-                                <span className="text-8xl md:text-[18rem] leading-none font-heading text-gradient-gold drop-shadow-[0_0_50px_rgba(207,181,59,0.6)] font-bold tabular-nums">
-                                    {String(timeLeft.seconds).padStart(2, '0')}
-                                </span>
-                                <span className="text-gold/90 text-sm md:text-2xl font-body uppercase tracking-[0.4em] mt-2 md:mt-4">Secondi</span>
-                            </div>
+                            {[
+                                { val: timeLeft.days, label: "Giorni", show: timeLeft.days > 0 },
+                                { val: timeLeft.hours, label: "Ore", show: true },
+                                { val: timeLeft.minutes, label: "Minuti", show: true },
+                                { val: timeLeft.seconds, label: "Secondi", show: true, isSeconds: true }
+                            ].filter(u => u.show).map((unit, idx, arr) => (
+                                <React.Fragment key={unit.label}>
+                                    <div className="flex flex-col items-center shrink-0">
+                                        <div className="relative flex items-center justify-center overflow-visible">
+                                            {/* Ghost anchor to keep width stable */}
+                                            <span className="text-7xl md:text-[min(18rem,20vw)] leading-none font-heading font-black invisible select-none tabular-nums">
+                                                88
+                                            </span>
+                                            {/* Actual numbers */}
+                                            <span className={`absolute flex items-center justify-center text-7xl md:text-[min(18rem,20vw)] leading-none font-heading font-black tabular-nums transition-all ${unit.isSeconds ? 'text-gradient-gold drop-shadow-[0_0_50px_rgba(207,181,59,0.6)]' : 'text-white drop-shadow-[0_0_30px_rgba(207,181,59,0.4)]'}`}>
+                                                {String(unit.val).padStart(2, '0')}
+                                            </span>
+                                        </div>
+                                        <span className="text-gold/90 text-sm md:text-2xl font-body uppercase tracking-[0.4em] mt-2 md:mt-4">{unit.label}</span>
+                                    </div>
+                                    {idx < arr.length - 1 && (
+                                        <span className="text-5xl md:text-[10rem] text-gold/40 font-heading animate-pulse mt-4 md:mt-8 shrink-0">:</span>
+                                    )}
+                                </React.Fragment>
+                            ))}
                         </motion.div>
                     )}
                 </AnimatePresence>
