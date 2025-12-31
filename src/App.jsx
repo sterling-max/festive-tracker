@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Sparkles, Gift } from 'lucide-react';
+import { MapPin, Sparkles, Gift, PartyPopper } from 'lucide-react';
 
 const Snow = () => {
     const canvasRef = useRef(null);
@@ -233,14 +233,23 @@ const SparkleBurst = () => {
 };
 
 function App() {
+    const [mode, setMode] = useState('christmas'); // 'christmas' or 'new-year'
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-    const [isChristmas, setIsChristmas] = useState(false);
+    const [isTargetReached, setIsTargetReached] = useState(false);
 
     useEffect(() => {
-        // Target: Midnight tonight (end of 24th, start of 25th)
-        const target = new Date();
-        target.setFullYear(2025, 11, 25);
-        target.setHours(0, 0, 0, 0);
+        const calculateTarget = () => {
+            const target = new Date();
+            if (mode === 'christmas') {
+                target.setFullYear(2025, 11, 25);
+            } else {
+                target.setFullYear(2026, 0, 1);
+            }
+            target.setHours(0, 0, 0, 0);
+            return target;
+        };
+
+        const target = calculateTarget();
 
         const interval = setInterval(() => {
             const now = new Date();
@@ -249,7 +258,7 @@ function App() {
             if (diff <= 0) {
                 clearInterval(interval);
                 setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-                setIsChristmas(true);
+                setIsTargetReached(true);
             } else {
                 const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
@@ -260,10 +269,11 @@ function App() {
         }, 1000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [mode]);
 
     const toggleMode = () => {
-        setIsChristmas(prev => !prev);
+        setMode(prev => prev === 'christmas' ? 'new-year' : 'christmas');
+        setIsTargetReached(false);
     }
 
     return (
@@ -282,8 +292,25 @@ function App() {
             <div className="absolute inset-0 z-0 bg-gradient-to-t from-black via-transparent to-black/40"></div>
 
             <Snow />
-            <FallingGifts />
-            <SantaFlightBar />
+            {mode === 'christmas' ? <FallingGifts /> : (
+                <div className="fixed inset-0 pointer-events-none z-20 overflow-hidden">
+                    {/* Placeholder for Fireworks - using a simple burst effect for now */}
+                    <AnimatePresence>
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <motion.div
+                                key={`firework-${i}`}
+                                initial={{ opacity: 0, scale: 0 }}
+                                animate={{ opacity: [0, 1, 0], scale: [0, 1.5, 2], x: [0, (i - 2) * 100], y: [0, -200] }}
+                                transition={{ duration: 2, repeat: Infinity, delay: i * 0.4 }}
+                                className="absolute left-1/2 bottom-0 text-4xl"
+                            >
+                                ✨
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
+                </div>
+            )}
+            {mode === 'christmas' && <SantaFlightBar />}
 
             <main className="relative z-20 flex flex-col items-center justify-center w-full h-full text-center px-4">
 
@@ -295,7 +322,10 @@ function App() {
                     className="flex flex-col items-center mb-8 md:mb-12"
                 >
                     <h2 className="text-xl md:text-2xl text-gold-glow mb-2 font-subheading italic tracking-[0.2em] font-light drop-shadow-custom opacity-80">
-                        {isChristmas ? "È Arrivato il Natale a" : "Il Natale a"}
+                        {isTargetReached
+                            ? (mode === 'christmas' ? "È Arrivato il Natale a" : "È Arrivato il 2026 a")
+                            : (mode === 'christmas' ? "Il Natale a" : "Il Capodanno a")
+                        }
                     </h2>
                     <h1 className="text-5xl md:text-7xl text-white font-heading font-bold uppercase tracking-widest drop-shadow-[0_2px_15px_rgba(255,255,255,0.2)]">
                         Carassai
@@ -303,16 +333,16 @@ function App() {
                 </motion.div>
 
                 <AnimatePresence mode='wait'>
-                    {isChristmas ? (
+                    {isTargetReached ? (
                         <motion.div
-                            key="christmas"
+                            key="target-reached"
                             initial={{ opacity: 0, scale: 0.5, filter: "blur(10px)" }}
                             animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                             transition={{ duration: 1, type: "spring" }}
                             className="flex flex-col items-center"
                         >
                             <h1 className="text-6xl md:text-[8rem] lg:text-[10rem] font-heading font-bold text-gradient-gold text-center leading-none drop-shadow-[0_0_50px_rgba(207,181,59,0.8)] animate-pulse-slow">
-                                BUON<br />NATALE!
+                                {mode === 'christmas' ? "BUON\nNATALE!" : "BUON\n2026!"}
                             </h1>
                             <motion.div
                                 initial={{ opacity: 0 }}
@@ -320,7 +350,7 @@ function App() {
                                 transition={{ delay: 1 }}
                                 className="mt-8 text-2xl text-white font-subheading italic tracking-widest"
                             >
-                                Auguri a tutti!
+                                {mode === 'christmas' ? "Auguri a tutti!" : "Felice Anno Nuovo!"}
                             </motion.div>
                         </motion.div>
                     ) : (
@@ -387,21 +417,37 @@ function App() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1.2, duration: 1 }}
-                    className="absolute bottom-8 md:bottom-12 flex items-center gap-4 text-white/50 font-body text-xs md:text-sm tracking-[0.3em] uppercase"
+                    className="absolute bottom-12 md:bottom-16 flex items-center gap-4 text-white/50 font-body text-xs md:text-sm tracking-[0.3em] uppercase"
                 >
                     <Sparkles className="w-4 h-4 text-gold" />
-                    <span>{isChristmas ? "Babbo Natale è Arrivato" : "La slitta è in arrivo"}</span>
+                    <span>
+                        {isTargetReached
+                            ? (mode === 'christmas' ? "Babbo Natale è Arrivato" : "Il 2026 è Qui")
+                            : (mode === 'christmas' ? "La slitta è in arrivo" : "Il brindisi si avvicina")
+                        }
+                    </span>
                     <Sparkles className="w-4 h-4 text-gold" />
                 </motion.div>
 
-                {/* Debug/Manual Toggle Button */}
-                <button
-                    onClick={toggleMode}
-                    className="absolute bottom-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-50 group"
-                    title="Toggle Christmas Mode"
-                >
-                    <Gift className="w-5 h-5 text-gold/50 group-hover:text-gold transition-colors" />
-                </button>
+                {/* Mode Switcher UI */}
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/40 backdrop-blur-xl px-4 py-2 rounded-full border border-white/10 shadow-2xl z-50">
+                    <button
+                        onClick={() => setMode('christmas')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 ${mode === 'christmas' ? 'bg-red-600 text-white shadow-lg' : 'text-white/40 hover:text-white/70'}`}
+                    >
+                        <Gift className="w-4 h-4" />
+                        <span className="text-xs font-bold uppercase tracking-wider">Natale</span>
+                    </button>
+                    <button
+                        onClick={() => setMode('new-year')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 ${mode === 'new-year' ? 'bg-gold text-black shadow-lg' : 'text-white/40 hover:text-white/70'}`}
+                    >
+                        <PartyPopper className="w-4 h-4" />
+                        <span className="text-xs font-bold uppercase tracking-wider">Capodanno</span>
+                    </button>
+                </div>
+
+                {/* Debug/Manual Toggle Button removed in favor of center switcher */}
 
             </main>
         </div >
