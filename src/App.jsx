@@ -484,40 +484,40 @@ function App() {
                             </motion.div>
 
                             {timeLeft.days > 0 && (
-                                <div className="flex flex-col items-center z-10">
-                                    <span className="text-7xl md:text-[10rem] leading-none font-mono text-white drop-shadow-[0_0_30px_rgba(207,181,59,0.4)] font-bold">
+                                <div className="flex flex-col items-center z-10 min-w-[1.2em]">
+                                    <span className="text-8xl md:text-[18rem] leading-none font-heading text-white drop-shadow-[0_0_30px_rgba(207,181,59,0.4)] font-bold tabular-nums">
                                         {timeLeft.days}
                                     </span>
-                                    <span className="text-gold/90 text-sm md:text-lg font-body uppercase tracking-[0.4em] mt-2 md:mt-4">Giorni</span>
+                                    <span className="text-gold/90 text-sm md:text-2xl font-body uppercase tracking-[0.4em] mt-2 md:mt-4">Giorni</span>
                                 </div>
                             )}
 
                             {/* Colon Separator */}
-                            {timeLeft.days > 0 && <span className="text-6xl md:text-[8rem] text-gold/40 font-mono animate-pulse -mt-2 md:-mt-4 z-10">:</span>}
+                            {timeLeft.days > 0 && <span className="text-7xl md:text-[14rem] text-gold/40 font-heading animate-pulse -mt-4 md:-mt-8 z-10">:</span>}
 
-                            <div className="flex flex-col items-center z-10">
-                                <span className="text-7xl md:text-[10rem] leading-none font-mono text-white drop-shadow-[0_0_30px_rgba(207,181,59,0.4)] font-bold tabular-nums">
+                            <div className="flex flex-col items-center z-10 min-w-[1.2em]">
+                                <span className="text-8xl md:text-[18rem] leading-none font-heading text-white drop-shadow-[0_0_30px_rgba(207,181,59,0.4)] font-bold tabular-nums">
                                     {String(timeLeft.hours).padStart(2, '0')}
                                 </span>
-                                <span className="text-gold/90 text-sm md:text-lg font-body uppercase tracking-[0.4em] mt-2 md:mt-4">Ore</span>
+                                <span className="text-gold/90 text-sm md:text-2xl font-body uppercase tracking-[0.4em] mt-2 md:mt-4">Ore</span>
                             </div>
 
-                            <span className="text-6xl md:text-[8rem] text-gold/40 font-mono animate-pulse -mt-2 md:-mt-4 z-10">:</span>
+                            <span className="text-7xl md:text-[14rem] text-gold/40 font-heading animate-pulse -mt-4 md:-mt-8 z-10">:</span>
 
-                            <div className="flex flex-col items-center z-10">
-                                <span className="text-7xl md:text-[10rem] leading-none font-mono text-white drop-shadow-[0_0_30px_rgba(207,181,59,0.4)] font-bold tabular-nums">
+                            <div className="flex flex-col items-center z-10 min-w-[1.3em]">
+                                <span className="text-8xl md:text-[18rem] leading-none font-heading text-white drop-shadow-[0_0_30px_rgba(207,181,59,0.4)] font-bold tabular-nums">
                                     {String(timeLeft.minutes).padStart(2, '0')}
                                 </span>
-                                <span className="text-gold/90 text-sm md:text-lg font-body uppercase tracking-[0.4em] mt-2 md:mt-4">Minuti</span>
+                                <span className="text-gold/90 text-sm md:text-2xl font-body uppercase tracking-[0.4em] mt-2 md:mt-4">Minuti</span>
                             </div>
 
-                            <span className="text-6xl md:text-[8rem] text-gold/40 font-mono animate-pulse -mt-2 md:-mt-4 z-10">:</span>
+                            <span className="text-7xl md:text-[14rem] text-gold/40 font-heading animate-pulse -mt-4 md:-mt-8 z-10">:</span>
 
-                            <div className="flex flex-col items-center relative z-10">
-                                <span className="text-7xl md:text-[10rem] leading-none font-mono text-gradient-gold drop-shadow-[0_0_50px_rgba(207,181,59,0.6)] font-bold tabular-nums">
+                            <div className="flex flex-col items-center relative z-10 min-w-[1.3em]">
+                                <span className="text-8xl md:text-[18rem] leading-none font-heading text-gradient-gold drop-shadow-[0_0_50px_rgba(207,181,59,0.6)] font-bold tabular-nums">
                                     {String(timeLeft.seconds).padStart(2, '0')}
                                 </span>
-                                <span className="text-gold/90 text-sm md:text-lg font-body uppercase tracking-[0.4em] mt-2 md:mt-4">Secondi</span>
+                                <span className="text-gold/90 text-sm md:text-2xl font-body uppercase tracking-[0.4em] mt-2 md:mt-4">Secondi</span>
                             </div>
                         </motion.div>
                     )}
