@@ -77,6 +77,115 @@ const Snow = () => {
     return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-10" />;
 };
 
+const Fireworks = () => {
+    const canvasRef = useRef(null);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let w = canvas.width = window.innerWidth;
+        let h = canvas.height = window.innerHeight;
+
+        const particles = [];
+
+        class Firework {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * w;
+                this.y = h;
+                this.targetY = Math.random() * (h * 0.5);
+                this.velocity = Math.random() * 3 + 2;
+                this.hue = Math.random() * 360;
+                this.exploded = false;
+                this.embers = [];
+            }
+
+            update() {
+                if (!this.exploded) {
+                    this.y -= this.velocity;
+                    if (this.y <= this.targetY) {
+                        this.exploded = true;
+                        this.explode();
+                    }
+                } else {
+                    for (let i = this.embers.length - 1; i >= 0; i--) {
+                        const e = this.embers[i];
+                        e.vx *= 0.98;
+                        e.vy *= 0.98;
+                        e.vy += 0.05; // gravity
+                        e.x += e.vx;
+                        e.y += e.vy;
+                        e.opacity -= 0.01;
+                        if (e.opacity <= 0) this.embers.splice(i, 1);
+                    }
+                    if (this.embers.length === 0) this.reset();
+                }
+            }
+
+            explode() {
+                const count = 50 + Math.random() * 50;
+                for (let i = 0; i < count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 4 + 1;
+                    this.embers.push({
+                        x: this.x,
+                        y: this.y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        opacity: 1,
+                        hue: this.hue + (Math.random() - 0.5) * 50
+                    });
+                }
+            }
+
+            draw() {
+                if (!this.exploded) {
+                    ctx.fillStyle = `hsl(${this.hue}, 100%, 70%)`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    this.embers.forEach(e => {
+                        ctx.fillStyle = `hsla(${e.hue}, 100%, 70%, ${e.opacity})`;
+                        ctx.beginPath();
+                        ctx.arc(e.x, e.y, 1.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                }
+            }
+        }
+
+        const fireworks = Array.from({ length: 5 }, () => new Firework());
+
+        const animate = () => {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.fillRect(0, 0, w, h);
+
+            fireworks.forEach(f => {
+                f.update();
+                f.draw();
+            });
+
+            requestAnimationFrame(animate);
+        };
+
+        animate();
+
+        const handleResize = () => {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-15" />;
+};
+
 const FallingGifts = () => {
     const [gifts, setGifts] = useState([]);
 
@@ -292,25 +401,14 @@ function App() {
             <div className="absolute inset-0 z-0 bg-gradient-to-t from-black via-transparent to-black/40"></div>
 
             <Snow />
-            {mode === 'christmas' ? <FallingGifts /> : (
-                <div className="fixed inset-0 pointer-events-none z-20 overflow-hidden">
-                    {/* Placeholder for Fireworks - using a simple burst effect for now */}
-                    <AnimatePresence>
-                        {Array.from({ length: 5 }).map((_, i) => (
-                            <motion.div
-                                key={`firework-${i}`}
-                                initial={{ opacity: 0, scale: 0 }}
-                                animate={{ opacity: [0, 1, 0], scale: [0, 1.5, 2], x: [0, (i - 2) * 100], y: [0, -200] }}
-                                transition={{ duration: 2, repeat: Infinity, delay: i * 0.4 }}
-                                className="absolute left-1/2 bottom-0 text-4xl"
-                            >
-                                ✨
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
-                </div>
+            {mode === 'christmas' ? (
+                <>
+                    <FallingGifts />
+                    <SantaFlightBar />
+                </>
+            ) : (
+                <Fireworks />
             )}
-            {mode === 'christmas' && <SantaFlightBar />}
 
             <main className="relative z-20 flex flex-col items-center justify-center w-full h-full text-center px-4">
 

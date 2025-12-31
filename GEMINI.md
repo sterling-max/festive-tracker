@@ -11,13 +11,13 @@ Convert the current Santa Tracker into a versatile Holiday Countdown app that su
 - **Toggle**: A stylish switcher to flip between modes.
 
 ## Pending Tasks
-- [ ] Rename the app in `package.json`.
-- [ ] Initialize git repository.
-- [ ] Create GitHub repository using GH CLI.
-- [ ] Commit and push initial code.
-- [ ] Implement "New Year's Eve" countdown logic.
+- [x] Rename the app in `package.json`.
+- [x] Initialize git repository.
+- [x] Create GitHub repository using GH CLI.
+- [x] Commit and push initial code.
+- [x] Implement "New Year's Eve" countdown logic.
 - [ ] Create "New Year" visual assets/effects (e.g., Fireworks instead of Gifts?).
-- [ ] Add the mode toggle UI.
+- [x] Add the mode toggle UI.
 
 ## Progress Tracking
-- 2025-12-31: Project initiated. Renaming and Git setup starting.
+- 2025-12-31: Project renamed, Git setup, New Year mode implemented with toggle.
