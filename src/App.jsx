@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Sparkles, Gift, PartyPopper } from 'lucide-react';
+import { MapPin, Sparkles, Gift, PartyPopper, Play } from 'lucide-react';
 
 const Snow = () => {
     const canvasRef = useRef(null);
@@ -77,7 +77,271 @@ const Snow = () => {
     return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-10" />;
 };
 
-const Fireworks = () => {
+const BorgoPanorama = () => {
+    return (
+        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+            {/* 1. Deep Night Sky - Darker background to make terrain pop */}
+            <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#020617] via-[#0f172a] to-[#1e293b]" />
+            <div className="absolute inset-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-soft-light" />
+
+            <motion.div
+                animate={{ x: ["0%", "-50%"] }}
+                transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 flex w-[200%] h-full"
+            >
+                {/* 360 Loop Container - render twice for seamless scrolling */}
+                {[0, 1].map((i) => (
+                    <div key={i} className="relative w-1/2 h-full flex items-end">
+                        <svg className="absolute bottom-0 w-full h-full" viewBox="0 0 1000 400" preserveAspectRatio="none">
+
+                            {/* --- LAYER 1: SKY & SEA (Background) --- */}
+                            <defs>
+                                <linearGradient id={`seaGlow-${i}`} x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#2563eb" />
+                                    <stop offset="100%" stopColor="#1e3a8a" />
+                                </linearGradient>
+                            </defs>
+
+                            {/* The Sea (East: 600-700) - Positioning it behind everything */}
+                            <rect x="600" y="380" width="100" height="20" fill={`url(#seaGlow-${i})`} />
+
+                            {/* --- LAYER 2: COASTAL PLAINS & LOW HILLS (Mid) --- */}
+                            {/* Connecting terrain. Low near sea (600-700), rising to mountains (0/1000) */}
+                            <path d="M0,400 L0,350 L300,350 C380,350 450,320 550,390 L600,390 L700,390 C800,320 900,350 1000,350 L1000,400 Z" fill="#475569" stroke="none" />
+
+                            {/* --- LAYER 3: MOUNTAINS (West: 0-300) --- */}
+                            {/* Single Apennine Block. High peaks. */}
+                            <path d="M-50,400 L-50,200 L50,140 L120,220 L180,160 L240,240 L300,400 Z" fill="#64748b" stroke="none" />
+                            {/* Wrap-around mountain part (end of loop) */}
+                            <path d="M950,400 L1000,240 L1050,160 L1050,400 Z" fill="#64748b" stroke="none" />
+
+                            {/* Snow Caps */}
+                            <path d="M40,155 L50,140 L60,155 Z" fill="#f8fafc" />
+                            <path d="M170,175 L180,160 L190,175 Z" fill="#f8fafc" />
+
+                            {/* --- LAYER 4: FOREGROUND (Continuous) --- */}
+                            <path d="M0,400 L0,380 C150,385 300,370 500,390 C700,370 850,385 1000,380 L1000,400 Z" fill="#334155" stroke="none" />
+
+                        </svg>
+                    </div>
+                ))}
+            </motion.div>
+            {/* Vignette */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_50%,rgba(0,0,0,0.6))] pointer-events-none" />
+        </div>
+    );
+};
+
+const DroneShow = ({ isCelebration }) => {
+    const canvasRef = useRef(null);
+    const celebrationRef = useRef(isCelebration);
+
+    useEffect(() => {
+        celebrationRef.current = isCelebration;
+    }, [isCelebration]);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        let w = canvas.width = window.innerWidth;
+        let h = canvas.height = window.innerHeight;
+
+        const droneCount = 200;
+        const drones = [];
+
+        const shapes = {
+            random: () => ({ x: 0.1 + Math.random() * 0.8, y: 0.05 + Math.random() * 0.3 }),
+            tree: (i, total) => {
+                const side = 0.85;
+                const height = 0.25, width = 0.18, yBase = 0.38;
+                const row = Math.floor(Math.sqrt(i)), col = i - row * row;
+                const totalRows = Math.floor(Math.sqrt(total));
+                return { x: side + (col / (row || 1) - 0.5) * ((row / totalRows) * width), y: yBase - (row / totalRows) * height, hue: 142 };
+            },
+            heart: (i, total) => {
+                const side = 0.15;
+                // Concentric Hearts Logic for density
+                const layer = Math.floor(i / (total / 4)); // 4 layers
+                const progress = (i % (total / 4)) / (total / 4);
+                const t = progress * Math.PI * 2;
+                const scale = 0.03 + layer * 0.025; // Growing scale
+
+                const lx = scale * Math.pow(Math.sin(t), 3);
+                const ly = -scale * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) / 16;
+                return { x: side + lx, y: 0.25 + ly, hue: 350 };
+            },
+            bigstar: (i, total) => {
+                const side = 0.85;
+                const angle = (i / total) * Math.PI * 2;
+                const r = i % 2 === 0 ? 0.1 : 0.04;
+                return { x: side + Math.cos(angle) * r, y: 0.25 + Math.sin(angle) * r, hue: 50 };
+            },
+            diamond: (i, total) => {
+                const side = 0.85;
+                const t = (i / total) * 1.0;
+                const p = (t * 4) % 1;
+                const points = [{ x: 0, y: -0.08 }, { x: 0.06, y: 0 }, { x: 0, y: 0.08 }, { x: -0.06, y: 0 }];
+                const p1 = points[Math.floor(t * 4) % 4], p2 = points[(Math.floor(t * 4) + 1) % 4];
+                return { x: side + p1.x + (p2.x - p1.x) * p, y: 0.25 + p1.y + (p2.y - p1.y) * p, hue: 190 };
+            },
+            toast: (i, total) => {
+                const isLeft = i < total / 2;
+                const side = isLeft ? 0.12 : 0.88;
+                const p = (i % (total / 2)) / (total / 2);
+
+                // Optimized: Simple pulse
+                const pulse = 1 + Math.sin(Date.now() * 0.003) * 0.08;
+                const h = (48 + Math.sin(Date.now() * 0.002) * 50 + 360) % 360;
+
+                if (isLeft) { // --- OPTIMIZED STAR ---
+                    const points = 5;
+                    const step = p * points * 2;
+                    const segment = Math.floor(step);
+                    const localP = step % 1;
+
+                    const outerR = 0.1 * pulse;
+                    const innerR = 0.04 * pulse;
+
+                    // Simple edges
+                    const a1 = (segment * Math.PI) / points - Math.PI / 2;
+                    const a2 = ((segment + 1) * Math.PI) / points - Math.PI / 2;
+                    const r1 = segment % 2 === 0 ? outerR : innerR;
+                    const r2 = (segment + 1) % 2 === 0 ? outerR : innerR;
+
+                    const x = side + (Math.cos(a1) * r1 * (1 - localP) + Math.cos(a2) * r2 * localP);
+                    const y = 0.32 + (Math.sin(a1) * r1 * (1 - localP) + Math.sin(a2) * r2 * localP);
+                    return { x: x, y: y, hue: h };
+                } else { // --- OPTIMIZED FLUTE ---
+                    const s = pulse * 0.9;
+                    // Pseudo-random angle for cylindrical scatter using index
+                    // Avoid Math.random() inside loop for stability, use index math
+                    const angle = i * 2.39996; // Golden angle approx in radians
+                    const cosA = Math.cos(angle);
+
+                    if (p < 0.70) { // Bowl
+                        const t = p / 0.70;
+                        const w = (0.045 - t * 0.015) * s;
+                        const x = side + cosA * w;
+                        const y = 0.10 + t * 0.30 * s;
+                        return { x, y, hue: t > 0.25 ? 48 : 60 };
+                    } else if (p < 0.90) { // Stem
+                        const t = (p - 0.70) / 0.2;
+                        const w = 0.005 * s;
+                        const x = side + cosA * w;
+                        return { x, y: 0.10 + 0.30 * s + t * 0.12, hue: 60 };
+                    } else { // Base
+                        const ang = i * 0.5; // Simple ring
+                        const w = 0.045 * s;
+                        const x = side + Math.cos(ang) * w;
+                        return { x, y: 0.52 + Math.sin(ang) * 0.01 * s, hue: 60 };
+                    }
+                }
+            },
+            stars: () => ({ x: 0.05 + Math.random() * 0.9, y: 0.05 + Math.random() * 0.35, hue: 210 })
+        };
+
+        const shapeConfigs = {
+            random: { hue: 200, sat: 50, lum: 50 },
+            tree: { hue: 142, sat: 80, lum: 45 },
+            heart: { hue: 350, sat: 90, lum: 55 },
+            newyear: { hue: 48, sat: 100, lum: 55 },
+            bigstar: { hue: 50, sat: 100, lum: 60 },
+            // smile removed
+            diamond: { hue: 190, sat: 70, lum: 60 },
+            stars: { hue: 210, sat: 20, lum: 90 },
+            toast: { hue: null, sat: 100, lum: 60 }
+        };
+
+        let currentShape = 'random';
+        const interval = setInterval(() => {
+            if (celebrationRef.current) {
+                currentShape = 'toast';
+            } else {
+                const exclude = ['toast', 'stars', 'tree'];
+                const availableKeys = Object.keys(shapes).filter(k => !exclude.includes(k));
+                currentShape = availableKeys[Math.floor(Math.random() * availableKeys.length)];
+            }
+        }, 6000);
+
+        for (let i = 0; i < droneCount; i++) {
+            drones.push({ x: Math.random() * w, y: Math.random() * h, targetX: 0, targetY: 0, hue: Math.random() * 360, sat: 100, lum: 70, vx: 0, vy: 0, noise: Math.random() * 100 });
+        }
+
+        const animate = () => {
+            if (celebrationRef.current) currentShape = 'toast';
+            ctx.clearRect(0, 0, w, h);
+            const time = Date.now() * 0.001;
+            const config = shapeConfigs[currentShape] || shapeConfigs.random;
+
+            drones.forEach((d, i) => {
+                const target = shapes[currentShape](i, droneCount);
+                d.targetX = target.x * w; d.targetY = target.y * h;
+
+                // Calculate distance to target for stability and lighting logic
+                const dx = d.targetX - d.x;
+                const dy = d.targetY - d.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                // Lighting Logic: Unlit (dim) when moving, lit when close
+                const targetBrightness = dist < 40 ? (config.lum || 70) : 5; // Low luminosity when far
+                d.lum += (targetBrightness - d.lum) * 0.05;
+
+                const targetHue = target.hue ?? config.hue ?? 200;
+                let diff = targetHue - d.hue;
+                while (diff > 180) diff -= 360;
+                while (diff < -180) diff += 360;
+                d.hue += diff * 0.03;
+                d.sat += (config.sat - d.sat) * 0.03;
+
+                // Movement Logic: Smooth damping as they arrive
+                if (dist > 1) {
+                    d.vx = dx * 0.03;
+                    d.vy = dy * 0.03;
+                    d.x += d.vx;
+                    d.y += d.vy;
+                } else {
+                    // Lock to position when very close for perfect stability
+                    d.x = d.targetX;
+                    d.y = d.targetY;
+                    d.vx = 0;
+                    d.vy = 0;
+                }
+
+                // Add subtle "flight" noise ONLY when far, stable when close
+                const jiggleScale = Math.min(dist / 50, 1.0);
+                d.x += Math.sin(time + d.noise) * 0.2 * jiggleScale;
+                d.y += Math.cos(time + d.noise) * 0.2 * jiggleScale;
+
+                const color = `hsl(${d.hue}, ${d.sat}%, ${d.lum}%)`;
+
+                // Restore blur (safe now that leak is fixed)
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = color;
+                ctx.fillStyle = color;
+
+                ctx.beginPath();
+                ctx.arc(d.x, d.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            animId = requestAnimationFrame(animate);
+        };
+
+        let animId = requestAnimationFrame(animate);
+
+        const handleResize = () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; };
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            clearInterval(interval);
+            cancelAnimationFrame(animId); // Fix accumulation leak
+        };
+    }, []);
+
+    return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-10" />;
+};
+
+const Fireworks = ({ isCelebration }) => {
     const canvasRef = useRef(null);
 
     useEffect(() => {
@@ -87,101 +351,100 @@ const Fireworks = () => {
         let w = canvas.width = window.innerWidth;
         let h = canvas.height = window.innerHeight;
 
-        const particles = [];
+        let fireworks = [];
+        let particles = [];
 
         class Firework {
-            constructor() {
-                this.reset();
-            }
-
-            reset() {
+            constructor(forceCelebration = false) {
                 this.x = Math.random() * w;
                 this.y = h;
-                this.targetY = Math.random() * (h * 0.5);
-                this.velocity = Math.random() * 3 + 2;
+                this.targetY = Math.random() * (h * 0.4) + (h * 0.1);
+                this.isCelebration = forceCelebration;
+                this.velocity = this.isCelebration ? (Math.random() * 4 + 6) : (Math.random() * 3 + 3);
                 this.hue = Math.random() * 360;
-                this.exploded = false;
-                this.embers = [];
+                this.dead = false;
             }
-
             update() {
-                if (!this.exploded) {
-                    this.y -= this.velocity;
-                    if (this.y <= this.targetY) {
-                        this.exploded = true;
-                        this.explode();
-                    }
-                } else {
-                    for (let i = this.embers.length - 1; i >= 0; i--) {
-                        const e = this.embers[i];
-                        e.vx *= 0.98;
-                        e.vy *= 0.98;
-                        e.vy += 0.05; // gravity
-                        e.x += e.vx;
-                        e.y += e.vy;
-                        e.opacity -= 0.01;
-                        if (e.opacity <= 0) this.embers.splice(i, 1);
-                    }
-                    if (this.embers.length === 0) this.reset();
+                this.y -= this.velocity;
+                if (this.y <= this.targetY) {
+                    this.explode();
+                    this.dead = true;
                 }
             }
-
             explode() {
-                const count = 50 + Math.random() * 50;
+                const count = this.isCelebration ? (80 + Math.random() * 50) : (30 + Math.random() * 20);
+                const speedMult = this.isCelebration ? 8 : 4;
                 for (let i = 0; i < count; i++) {
                     const angle = Math.random() * Math.PI * 2;
-                    const speed = Math.random() * 4 + 1;
-                    this.embers.push({
+                    const speed = Math.random() * speedMult + 1;
+                    particles.push({
                         x: this.x,
                         y: this.y,
                         vx: Math.cos(angle) * speed,
                         vy: Math.sin(angle) * speed,
                         opacity: 1,
-                        hue: this.hue + (Math.random() - 0.5) * 50
+                        hue: this.hue + (Math.random() - 0.5) * 40,
+                        size: this.isCelebration ? (Math.random() * 2 + 1) : 1.5,
+                        friction: this.isCelebration ? 0.96 : 0.98,
+                        gravity: 0.1
                     });
                 }
             }
-
             draw() {
-                if (!this.exploded) {
-                    ctx.fillStyle = `hsl(${this.hue}, 100%, 70%)`;
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
-                    ctx.fill();
-                } else {
-                    this.embers.forEach(e => {
-                        ctx.fillStyle = `hsla(${e.hue}, 100%, 70%, ${e.opacity})`;
-                        ctx.beginPath();
-                        ctx.arc(e.x, e.y, 1.5, 0, Math.PI * 2);
-                        ctx.fill();
-                    });
-                }
+                ctx.fillStyle = `hsl(${this.hue}, 100%, 70%)`;
+                ctx.beginPath(); ctx.arc(this.x, this.y, 2, 0, Math.PI * 2); ctx.fill();
             }
         }
 
-        const fireworks = Array.from({ length: 5 }, () => new Firework());
-
+        let lastSpawn = 0;
         const animate = () => {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-            ctx.fillRect(0, 0, w, h);
+            ctx.clearRect(0, 0, w, h);
 
-            fireworks.forEach(f => {
-                f.update();
-                f.draw();
-            });
+            const now = Date.now();
+            const spawnRate = isCelebration ? 400 : 4000; // Fever fireworks normally
+            if (now - lastSpawn > spawnRate) {
+                fireworks.push(new Firework(isCelebration));
+                lastSpawn = now;
+            }
+
+            for (let i = fireworks.length - 1; i >= 0; i--) {
+                fireworks[i].update();
+                if (fireworks[i].dead) fireworks.splice(i, 1);
+                else fireworks[i].draw();
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.vx *= p.friction;
+                p.vy *= p.friction;
+                p.vy += p.gravity;
+                p.x += p.vx;
+                p.y += p.vy;
+                p.opacity -= isCelebration ? 0.02 : 0.03; // Faster fadeout
+
+                if (p.opacity <= 0) {
+                    particles.splice(i, 1);
+                } else {
+                    ctx.globalCompositeOperation = 'lighter'; // Cheap glow effect
+                    ctx.fillStyle = `hsla(${p.hue}, 100%, ${isCelebration ? 80 : 70}%, ${p.opacity})`;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            ctx.globalCompositeOperation = 'source-over';
 
             requestAnimationFrame(animate);
         };
 
-        animate();
-
-        const handleResize = () => {
-            w = canvas.width = window.innerWidth;
-            h = canvas.height = window.innerHeight;
-        };
+        const animId = requestAnimationFrame(animate);
+        const handleResize = () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; };
         window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+        return () => {
+            cancelAnimationFrame(animId);
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [isCelebration]);
 
     return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-15" />;
 };
@@ -320,21 +583,35 @@ const SantaFlightBar = () => {
 }
 
 const SparkleBurst = () => {
-    const burstCount = 12;
+    const burstCount = 15;
+    const sparkles = React.useMemo(() => {
+        return Array.from({ length: burstCount }).map(() => ({
+            scale: Math.random() * 1.5 + 0.5,
+            x: (Math.random() - 0.5) * 300,
+            y: (Math.random() - 0.5) * 300,
+            delay: Math.random() * 2
+        }));
+    }, []);
+
     return (
         <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-            {Array.from({ length: burstCount }).map((_, i) => (
+            {sparkles.map((s, i) => (
                 <motion.div
                     key={i}
-                    initial={{ opacity: 1, scale: 0, x: 0, y: 0 }}
+                    initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
                     animate={{
-                        opacity: 0,
-                        scale: Math.random() * 1.5 + 0.5,
-                        x: (Math.random() - 0.5) * 200,
-                        y: (Math.random() - 0.5) * 200,
+                        opacity: [0, 1, 0],
+                        scale: [0, s.scale, 0],
+                        x: s.x,
+                        y: s.y,
                     }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                    className="absolute w-2 h-2 rounded-full bg-gold shadow-[0_0_10px_#cfb53b]"
+                    transition={{
+                        duration: 1.5,
+                        repeat: Infinity,
+                        delay: s.delay,
+                        ease: "easeOut"
+                    }}
+                    className="absolute w-2 h-2 rounded-full bg-gold shadow-[0_0_15px_#cfb53b]"
                 />
             ))}
         </div>
@@ -400,16 +677,18 @@ function App() {
 
     return (
         <div className="relative h-screen w-screen overflow-hidden flex flex-col items-center justify-center bg-black">
-            {/* Visual Background */}
-            <div
-                className="absolute inset-0 z-0 scale-105"
-                style={{
-                    backgroundImage: 'url(/bg.png?v=2)',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    filter: 'brightness(0.5) contrast(1.2)'
-                }}
-            />
+            {/* Visual Background - Only for Christmas */}
+            {mode === 'christmas' && (
+                <div
+                    className="absolute inset-0 z-0 scale-105"
+                    style={{
+                        backgroundImage: 'url(/bg.png?v=2)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        filter: 'brightness(0.5) contrast(1.2)'
+                    }}
+                />
+            )}
 
             <div className="absolute inset-0 z-0 bg-gradient-to-t from-black via-transparent to-black/40"></div>
 
@@ -420,7 +699,15 @@ function App() {
                     <SantaFlightBar />
                 </>
             ) : (
-                <Fireworks />
+                <>
+                    <div className="fixed inset-0 z-[1]">
+                        <BorgoPanorama />
+                    </div>
+                    <DroneShow isCelebration={isTargetReached} />
+                    <div className="fixed inset-0 z-40 pointer-events-none">
+                        <Fireworks isCelebration={isTargetReached} />
+                    </div>
+                </>
             )}
 
             <main className="relative z-20 flex flex-col items-center justify-center w-full h-full text-center px-4">
@@ -447,8 +734,8 @@ function App() {
                     {isTargetReached ? (
                         <motion.div
                             key="target-reached"
-                            initial={{ opacity: 0, scale: 0.5, filter: "blur(10px)" }}
-                            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                            initial={{ opacity: 0, scale: 0.5 }}
+                            animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 1, type: "spring" }}
                             className="flex flex-col items-center"
                         >
@@ -470,19 +757,14 @@ function App() {
                             key="countdown"
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 1.5, filter: "blur(20px)" }}
+                            exit={{ opacity: 0, scale: 1.5 }}
                             transition={{ delay: 0.3, duration: 0.8 }}
                             className="relative flex items-start justify-center gap-4 md:gap-12 w-full max-w-full mx-auto"
                         >
-                            {/* Pulse & Sparkle Wrapper */}
-                            <motion.div
-                                key={timeLeft.seconds}
-                                animate={{ scale: [1, 1.02, 1] }}
-                                transition={{ duration: 0.4, ease: "easeOut" }}
-                                className="absolute inset-0 pointer-events-none flex items-center justify-center"
-                            >
+                            {/* Continuous Subtle Pulse */}
+                            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
                                 <SparkleBurst />
-                            </motion.div>
+                            </div>
 
                             {[
                                 { val: timeLeft.days, label: "Giorni", show: timeLeft.days > 0 },
@@ -547,7 +829,16 @@ function App() {
                     </button>
                 </div>
 
-                {/* Debug/Manual Toggle Button removed in favor of center switcher */}
+                {/* Debug/Manual Trigger Button for Testing Animation */}
+                <div className="absolute bottom-6 right-6 z-50">
+                    <button
+                        onClick={() => setIsTargetReached(!isTargetReached)}
+                        className="p-3 bg-white/5 hover:bg-white/10 text-white/20 hover:text-white/60 rounded-full transition-all duration-300 backdrop-blur-sm border border-white/5"
+                        title="Test Animation"
+                    >
+                        <Play className="w-4 h-4" />
+                    </button>
+                </div>
 
             </main>
         </div >
